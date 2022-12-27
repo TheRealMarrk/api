@@ -9,6 +9,7 @@ class NotesController{
         title,
         description,
         user_id
+        
   })
 
       const linksInsert  = links.map(link => {
