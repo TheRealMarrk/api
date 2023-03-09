@@ -2,7 +2,7 @@ const { hash, compare } = require("bcryptjs")
 const AppError = require("../utils/AppError")
 const sqliteConnection = require('../database/sqlite')
 
-class UsersContoller {
+class UsersController {
   async create(request, response) {
     const { name, email, password } = request.body
 
@@ -16,7 +16,8 @@ class UsersContoller {
     const hashedPassword = await hash(password, 8)
 
     await database.run(
-      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [name, email, hashedPassword]
+      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)", 
+      [name, email, hashedPassword]
     )
 
     return response.status(201).json()
@@ -24,10 +25,9 @@ class UsersContoller {
 
   async update(request, response) {
     const { name, email, password, old_password } = request.body
-    const { id } = request.params
-
+    const user_id = request.user.id
     const database = await sqliteConnection()
-    const user = await database.get("SELECT * FROM users WHERE id = (?)", [id])
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id])
 
     if (!user) {
       throw new AppError("Usuário não encontrado!")
@@ -63,11 +63,11 @@ class UsersContoller {
       password = ?,
       updated_at = DATETIME('now')
       WHERE id = ?
-      `, [user.name, user.email, user.password, id]
+      `, [user.name, user.email, user.password, user_id]
     )
 
     return response.json()
   }
 }
 
-module.exports = UsersContoller
+module.exports = UsersController
